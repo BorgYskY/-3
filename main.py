@@ -1,2 +1,3 @@
-f = open(r"C:\Users\konev\Downloads\Google.html")
+file = "sample html.html"
+f = open(file)
 print(f.read())
