@@ -1,3 +1,5 @@
+import myparser
 file = "sample html.html"
 f = open(file)
-print(f.read())
+
+print(myparser.parser(file))
