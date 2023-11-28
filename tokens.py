@@ -2,7 +2,6 @@ cur_char = ''
 
 get_char = None
 
-#digits = [x for x in "123456"]
 def get_token():
     global cur_char
     if cur_char == '<':
@@ -18,9 +17,15 @@ def get_token():
         else:
             return start_tag()
     elif cur_char == '>':
-        return data()
+        cur_char = get_char()
+        if cur_char != '\n':
+            return data()
+        else: 
+            skip_whitespace()
     elif cur_char == -1:
         return ('eof', )
+    elif cur_char == '\n':
+        skip_whitespace()
 
 def start_tag():
     tag = ""
@@ -28,22 +33,23 @@ def start_tag():
     while cur_char != '>':
         tag += cur_char
         cur_char = get_char()
+    # cur_char = get_char()
     return('start', tag)
 
 def end_tag():
     tag = ""
     global cur_char
     while cur_char != '>':
-        cur_char = get_char()
         tag += cur_char
+        cur_char = get_char()
     return('end', tag)
 
 def data():
     data = ""
     global  cur_char
     while cur_char != '<':
-        cur_char = get_char()
         data += cur_char
+        cur_char = get_char()
     return('data', data)
 
 def skip_comment():
@@ -51,6 +57,10 @@ def skip_comment():
         cur_char = get_char()
     cur_char = get_char()
 
+def skip_whitespace():
+    global cur_char
+    while cur_char != '<':
+        cur_char = get_char()
 
 if __name__ == '__main__':
     print("Test tokens")
@@ -62,6 +72,8 @@ if __name__ == '__main__':
 
     get_char = getch
     cur_char = get_char()
-    for i in range(10):
-        print(get_token())
+    for i in range(100):
+        borg = get_token()
+        if borg != None:
+            print(borg)
     f.close()
