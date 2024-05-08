@@ -69,7 +69,6 @@ def start_tag():
             break            
         if val_state == True:
             val += cur_char
-
         if func_state == False and val_state == False:
             tag += cur_char
         cur_char = get_char()
