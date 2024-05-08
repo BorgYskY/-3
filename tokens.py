@@ -2,6 +2,19 @@ cur_char = ''
 
 get_char = None
 
+class token:
+    def __init__(self, tag, func, val):
+        self.tag = tag
+        self.func = func
+        self.val = val
+    
+    def __str__(self):
+        if self.func == "":
+            self.func = None
+        if self.val == "":
+            self.val = None
+        return f"{self.tag}, {self.func}, {self.val}"
+
 def get_token():
     global cur_char
     if cur_char == '<':
@@ -36,15 +49,31 @@ def doctype():
     while cur_char != '>':
         dtype += cur_char
         cur_char = get_char()
-    return('doctype', dtype)
+    return token("doctype", None, dtype)
 
 def start_tag():
-    tag = ""
     global cur_char
-    while cur_char != '>':
-        tag += cur_char
+    tag, func, val = "", "", ""
+    func_state, val_state = False, False
+    while True:
+        if cur_char == ' ':
+            skip_whitespace()
+            func_state = True
+        if func_state == True and val_state == False:
+           if cur_char == '=':
+               cur_char = get_char()
+               val_state = True
+               continue
+           func += cur_char
+        if cur_char == '>':
+            break            
+        if val_state == True:
+            val += cur_char
+
+        if func_state == False and val_state == False:
+            tag += cur_char
         cur_char = get_char()
-    return('start', tag)
+    return token(tag, func, val)
 
 def end_tag():
     tag = ""
@@ -53,7 +82,7 @@ def end_tag():
     while cur_char != '>':
         tag += cur_char
         cur_char = get_char()
-    return('end', tag)
+    return token("end", None, tag)
 
 def data():
     data = ""
@@ -61,7 +90,7 @@ def data():
     while cur_char != '<':
         data += cur_char
         cur_char = get_char()
-    return('data', data)
+    return token("data", None, data)
 
 def skip_comment():
     global cur_char
@@ -70,8 +99,10 @@ def skip_comment():
 
 def skip_whitespace():
     global cur_char
-    while cur_char != '<':
-        cur_char = get_char()
+    while True:
+        if cur_char == ' ' or cur_char == '\n':
+            cur_char = get_char()
+        else: break
 
 if __name__ == '__main__':
     print("Test tokens")
