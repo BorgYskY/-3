@@ -7,6 +7,8 @@ class token:
         self.tag = tag
         self.func = func
         self.val = val
+        self.children = []
+        self.parent = None
     
     def __str__(self):
         if self.func == "":
@@ -14,6 +16,10 @@ class token:
         if self.val == "":
             self.val = None
         return f"{self.tag}, {self.func}, {self.val}"
+    
+    def add_child(self, token):
+        self.children.append(token)
+        token.parent = self
 
 def get_token():
     global cur_char
@@ -31,12 +37,12 @@ def get_token():
             return start_tag()
     elif cur_char == '>':
         cur_char = get_char()
+        if cur_char == '':
+            return 'eof'
         if cur_char != '\n':
             return data()
         else: 
             skip_whitespace()
-    elif cur_char == -1:
-        return ('eof', )
     elif cur_char == '\n':
         skip_whitespace()
 
@@ -69,7 +75,6 @@ def start_tag():
             break            
         if val_state == True:
             val += cur_char
-
         if func_state == False and val_state == False:
             tag += cur_char
         cur_char = get_char()
@@ -82,7 +87,7 @@ def end_tag():
     while cur_char != '>':
         tag += cur_char
         cur_char = get_char()
-    return token("end", None, tag)
+    return token('end', None, tag)
 
 def data():
     data = ""
@@ -90,7 +95,7 @@ def data():
     while cur_char != '<':
         data += cur_char
         cur_char = get_char()
-    return token("data", None, data)
+    return token('data', None, data)
 
 def skip_comment():
     global cur_char
@@ -111,10 +116,10 @@ if __name__ == '__main__':
     def getch():
         global cur_char
         return f.read(1)
-
+    temp = None
     get_char = getch
     cur_char = get_char()
-    for i in range(30):
+    while temp != 'eof':
         temp = get_token()
         if temp != None:
             print(temp)
