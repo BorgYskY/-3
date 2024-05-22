@@ -39,8 +39,10 @@ def get_token():
         cur_char = get_char()
         if cur_char == '':
             return 'eof'
-        if cur_char != '\n':
+        if cur_char != '\n' and cur_char != '<':
             return data()
+        if cur_char == '<':
+            pass
         else: 
             skip_whitespace()
     elif cur_char == '\n':
