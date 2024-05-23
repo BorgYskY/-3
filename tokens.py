@@ -23,6 +23,9 @@ class token:
 
 def get_token():
     global cur_char
+    while cur_char == ' ' or cur_char == '\n':
+        cur_char = get_char()
+    
     if cur_char == '<':
         cur_char = get_char()
         if cur_char == '/':
@@ -31,10 +34,12 @@ def get_token():
             cur_char = get_char()
             if cur_char == '-':
                 skip_comment()
+                return get_token()
             else:
                 return doctype()
         else:
             return start_tag()
+<<<<<<< Updated upstream
     elif cur_char == '>':
         cur_char = get_char()
         if cur_char == '':
@@ -45,69 +50,84 @@ def get_token():
             skip_whitespace()
     elif cur_char == '\n':
         skip_whitespace()
+=======
+    elif cur_char != '':
+        return data()
+    else:
+        return 'eof'
+>>>>>>> Stashed changes
 
 def doctype():
     global cur_char
     dtype = ""
     while cur_char != ' ':
         cur_char = get_char()
-    cur_char = get_char()
     while cur_char != '>':
         dtype += cur_char
         cur_char = get_char()
-    return token("doctype", None, dtype)
+    cur_char = get_char()  # move past '>'
+    return token("doctype", None, dtype.strip())
 
 def start_tag():
     global cur_char
     tag, func, val = "", "", ""
     func_state, val_state = False, False
-    while True:
-        if cur_char == ' ':
-            skip_whitespace()
+    while cur_char != '>':
+        if cur_char == ' ' and not func_state:
             func_state = True
-        if func_state == True and val_state == False:
-           if cur_char == '=':
-               cur_char = get_char()
-               val_state = True
-               continue
-           func += cur_char
-        if cur_char == '>':
-            break            
-        if val_state == True:
-            val += cur_char
-        if func_state == False and val_state == False:
+            cur_char = get_char()
+            continue
+        if func_state and not val_state:
+            if cur_char == '=':
+                cur_char = get_char()  # move past '='
+                val_state = True
+                continue
+            if cur_char == ' ':
+                cur_char = get_char()
+                continue
+            func += cur_char
+        elif val_state:
+            if cur_char == ' ':
+                cur_char = get_char()
+                continue
+            if cur_char == '"':
+                cur_char = get_char()
+                while cur_char != '"':
+                    val += cur_char
+                    cur_char = get_char()
+                cur_char = get_char()  # move past closing '"'
+            else:
+                val += cur_char
+        else:
             tag += cur_char
         cur_char = get_char()
-    return token(tag, func, val)
+    
+    cur_char = get_char()  # move past '>'
+    return token(tag.strip(), func.strip(), val.strip())
 
 def end_tag():
-    tag = ""
     global cur_char
-    cur_char = get_char()
+    tag = ""
     while cur_char != '>':
         tag += cur_char
         cur_char = get_char()
-    return token('end', None, tag)
+    cur_char = get_char()  # move past '>'
+    return token('end', None, tag.strip())
 
 def data():
+    global cur_char
     data = ""
-    global  cur_char
     while cur_char != '<':
         data += cur_char
         cur_char = get_char()
-    return token('data', None, data)
+    return token('data', None, data.strip())
 
 def skip_comment():
     global cur_char
-    while cur_char != '>':
-        cur_char = get_char()
-
-def skip_whitespace():
-    global cur_char
     while True:
-        if cur_char == ' ' or cur_char == '\n':
-            cur_char = get_char()
-        else: break
+        cur_char = get_char()
+        if cur_char == '>':
+            break
 
 if __name__ == '__main__':
     print("Test tokens")
