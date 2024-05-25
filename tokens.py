@@ -7,8 +7,6 @@ class token:
         self.tag = tag
         self.func = func
         self.val = val
-        self.children = []
-        self.parent = None
     
     def __str__(self):
         if self.func == "":
@@ -17,9 +15,6 @@ class token:
             self.val = None
         return f"{self.tag}, {self.func}, {self.val}"
     
-    def add_child(self, token):
-        self.children.append(token)
-        token.parent = self
 
 def get_token():
     global cur_char
@@ -31,6 +26,7 @@ def get_token():
             cur_char = get_char()
             if cur_char == '-':
                 skip_comment()
+                return get_token()
             else:
                 return doctype()
         else:
@@ -42,11 +38,13 @@ def get_token():
         if cur_char != '\n' and cur_char != '<':
             return data()
         if cur_char == '<':
-            pass
+            return get_token()
         else: 
             skip_whitespace()
+            return get_token()
     elif cur_char == '\n':
         skip_whitespace()
+        return get_token()
 
 def doctype():
     global cur_char
@@ -113,7 +111,7 @@ def skip_whitespace():
 
 if __name__ == '__main__':
     print("Test tokens")
-    f = open("sample html.html")
+    f = open("html2.html")
 
     def getch():
         global cur_char

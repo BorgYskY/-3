@@ -1,4 +1,5 @@
 import tokens
+from element import Element
 
 def dom(file):
     f = open(file)
@@ -6,29 +7,40 @@ def dom(file):
         return f.read(1)
     tokens.get_char = getch
     tokens.cur_char = tokens.get_char()
-    temp = None
-    tree = tokens.token("document", None, None)
-    flag = tree
+    root = parse_element()
+    return root
 
-    while temp != 'eof':
-        temp = tokens.get_token()
-        if temp is not None and temp != 'eof':
-            if temp.tag != 'end' and temp.tag != 'meta' and temp.tag != 'data':
-                flag.add_child(temp)
-                flag = temp
-            elif temp.tag == 'meta' or temp.tag == 'data':
-                flag.add_child(temp)
-            elif temp.tag == 'end':
-                if flag.tag == temp.val:
-                    flag.add_child(temp)
-                    flag = flag.parent 
+def parse_element(parent=None):
+    token = tokens.get_token()
+    if token is None:
+        return None
+    if token == 'eof':
+        return None
+    if token.tag == 'end':
+        return None
+    if token.func:
+        elem = Element(token.tag)
+    else:
+        elem = Element(token.tag, token.val)
+    if token.func and token.val:
+        elem.attributes[token.func] = token.val
+    
+    if token.tag != 'data' and token.tag != 'meta':
+        while True:
+            child = parse_element()
+            if child is None:
+                break
+            elem.add_child(child)   
+    return elem
+   
+def print_element(element, indent=0):
+    attributes_str = ""
+    for attr, value in element.attributes.items():
+        attributes_str += f" {attr}=\"{value}\""
+    print('  ' * indent + f"<{element.tag}{attributes_str}>{element.text if element.text else ''}")
+    for child in element.children:
+        print_element(child, indent + 1)
 
-    f.close()
-    return tree
 
-def print_tree(node, level=0):
-    indent = "  " * level
-    print(f"{indent}{node}")
-    for child in node.children:
-        print_tree(child, level + 1)
-
+if __name__ == "__main__":
+    print_element(dom("html2.html"))

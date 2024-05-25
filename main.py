@@ -7,7 +7,7 @@ filename = arg_parser.parse_args().filename
 
 try:
     file = filename
-    dom.print_tree(dom.dom(file))
+    dom.print_element(dom.dom(file))
 except Exception:
     print("Некорректное имя файла")
     pass
