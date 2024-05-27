@@ -37,10 +37,11 @@ def print_element(element, indent=0):
     attributes_str = ""
     for attr, value in element.attributes.items():
         attributes_str += f" {attr}=\"{value}\""
-    print('  ' * indent + f"<{element.tag}{attributes_str}>{element.text if element.text else ''}")
+    result = '  ' * indent + f"<{element.tag}{attributes_str}>{element.text if element.text else ''}\n"
     for child in element.children:
-        print_element(child, indent + 1)
+        result += print_element(child, indent + 1)
+    return result
 
 
 if __name__ == "__main__":
-    print_element(dom("html2.html"))
+    print(print_element(dom("html1.html")))
