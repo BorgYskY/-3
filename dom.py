@@ -1,5 +1,6 @@
 import tokens
 from element import Element
+import html
 
 def dom(file):
     f = open(file)
@@ -21,7 +22,8 @@ def parse_element(parent=None):
     if token.func:
         elem = Element(token.tag)
     else:
-        elem = Element(token.tag, token.val)
+        text = html.unescape(token.val)
+        elem = Element(token.tag, text)
     if token.func and token.val:
         elem.attributes[token.func] = token.val
     
