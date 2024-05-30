@@ -12,10 +12,21 @@ class app(tk.Tk):
     def display_dom(self, element, y=20):
         if element.tag == 'title':
             self.title(element.children[0].text)
-        if element.tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']:
+        if element.tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             for child in element.children:
                 if child.tag == 'data' and child.text:
-                    self.canvas.create_text(10, y, anchor='nw', text=child.text)
+                    font_size = {'h1': 32,
+                                 'h2': 24,
+                                 'h3': 18,
+                                 'h4': 16,
+                                 'h5': 13,
+                                 'h6': 11}[element.tag]
+                    self.canvas.create_text(10, y, anchor='nw', text=child.text, font=('Times New Roman', font_size, 'bold'))
+                    y += font_size + 20
+        elif element.tag == 'p':
+            for child in element.children:
+                if child.tag == 'data' and child.text:
+                    self.canvas.create_text(10, y, anchor='nw', text=child.text, font=('Times New Roman', 12))
                     y += 20
         
         for child in element.children:
