@@ -1,47 +1,61 @@
 import tkinter as tk
+from tkinter import filedialog, messagebox
 from element import Element
+import dom
 
 class app(tk.Tk):
-    def __init__(self, element):
+    def __init__(self):
         super().__init__()
+        self.title("DOM viewer")
         self.geometry("1500x700")
+        self.create_menu()
         self.canvas = tk.Canvas(self, bg="white")
         self.canvas.pack(fill=tk.BOTH, expand=True)
-        self.display_dom(element)
 
-    def display_dom(self, element, y=20):
-        if element.tag == 'title':
-            self.title(element.children[0].text)
+    def create_menu(self):
+        menubar = tk.Menu(self)
+        filemenu = tk.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Загрузить файл", command=self.load_file)
+        menubar.add_cascade(label="Файл", menu=filemenu)
+        self.config(menu=menubar)
+
+    def clear_canvas(self):
+        self.canvas.delete("all")
+
+    def load_file(self):
+        filename = filedialog.askopenfilename(title="Выберите файл HTML", filetypes=[("HTML файлы", "*.html")])
+        if filename:
+            try:
+                self.clear_canvas()
+                root_element = dom.dom(filename)
+                self.display_dom_tree(root_element)
+            except Exception as e:
+                messagebox.showerror("Ошибка", str(e))
+
+    def display_dom_tree(self, element, y=20):
         if element.tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             for child in element.children:
                 if child.tag == 'data' and child.text:
-                    font_size = {'h1': 32,
-                                 'h2': 24,
-                                 'h3': 18,
-                                 'h4': 16,
-                                 'h5': 13,
-                                 'h6': 11}[element.tag]
+                    font_size = {
+                        'h1': 32,
+                        'h2': 24,
+                        'h3': 18,
+                        'h4': 16,
+                        'h5': 13,
+                        'h6': 11}[element.tag]
                     self.canvas.create_text(10, y, anchor='nw', text=child.text, font=('Times New Roman', font_size, 'bold'))
-                    y += font_size + 20
+                    y += font_size + 10
         elif element.tag == 'p':
             for child in element.children:
                 if child.tag == 'data' and child.text:
                     self.canvas.create_text(10, y, anchor='nw', text=child.text, font=('Times New Roman', 12))
                     y += 20
-        
+
         for child in element.children:
-            y = self.display_dom(child, y)
+            y = self.display_dom_tree(child, y)
         
         return y
 
-
 if __name__ == "__main__":
-    from element import Element
-    root = Element('html')
-    body = Element('body')
-    root.add_child(body)
-    body.add_child(Element('h1', 'This is an H1 tag'))
-    body.add_child(Element('p', 'This is a paragraph tag'))
-    body.add_child(Element('p', 'This is another paragraph tag'))
-    app = app(root)
+    app = app()
     app.mainloop()
