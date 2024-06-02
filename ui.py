@@ -33,6 +33,8 @@ class app(tk.Tk):
                 messagebox.showerror("Ошибка", str(e))
 
     def display_dom_tree(self, element, y=20):
+        if element.tag == 'title':
+            self.title(element.children[0].text)
         if element.tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             for child in element.children:
                 if child.tag == 'data' and child.text:
