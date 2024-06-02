@@ -6,7 +6,7 @@ import dom
 class app(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("DOM viewer")
+        self.title("Интернет-браузер")
         self.geometry("1500x700")
         self.create_menu()
         self.canvas = tk.Canvas(self, bg="white")
